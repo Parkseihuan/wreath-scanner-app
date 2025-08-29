@@ -4,90 +4,105 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>화환 문구 인식 앱</title>
-    <meta name="description" content="화환 문구를 자동으로 인식하여 구글 스프레드시트에 저장">
+    <meta name="description" content="예식장, 장례식장 화환 문구를 자동으로 인식하여 구글 스프레드시트에 저장하는 웹앱">
     
-    <!-- PWA -->
+    <!-- 
+    ==========================================
+    🌸 화환 문구 인식 앱 v1.0
+    ==========================================
+    
+    📋 관리자 설정 방법:
+    1. 구글 스프레드시트 생성
+    2. Apps Script에 code.gs 내용 붙여넣기
+    3. 웹앱으로 배포 (모든 사용자 액세스 허용)
+    4. 아래 WEBAPP_URL을 실제 웹앱 URL로 변경
+    5. GitHub Pages에 배포
+    
+    👥 사용 방법:
+    - 동료들은 앱 접속 후 바로 사용 가능
+    - 화환 촬영 → 자동 문구 인식 → 사용자 이름 입력 → 스프레드시트 저장
+    
+    ==========================================
+    -->
+    
+    <!-- PWA 메타 태그 -->
     <meta name="theme-color" content="#667eea">
     <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="화환 문구 인식">
     
     <!-- 파비콘 -->
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌸</text></svg>">
     
-    <!-- Tesseract.js -->
+    <!-- Tesseract.js CDN -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tesseract.js/4.1.1/tesseract.min.js"></script>
     
     <style>
         * {
+            box-sizing: border-box;
             margin: 0;
             padding: 0;
-            box-sizing: border-box;
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans KR', sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
-            padding: 5px;
-            margin: 0;
-            -webkit-user-select: none;
-            -moz-user-select: none;
-            -ms-user-select: none;
-            user-select: none;
+            padding: 10px;
+            line-height: 1.6;
         }
 
         .container {
-            max-width: 400px;
+            max-width: 500px;
             margin: 0 auto;
             background: white;
-            border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
             overflow: hidden;
         }
 
         .header {
             background: linear-gradient(135deg, #ff6b6b, #ffd93d);
             color: white;
-            padding: 15px;
+            padding: 20px;
             text-align: center;
         }
 
         .header h1 {
-            font-size: 20px;
-            margin-bottom: 5px;
+            font-size: 24px;
+            margin-bottom: 10px;
             font-weight: 700;
         }
 
         .header p {
-            font-size: 12px;
+            font-size: 14px;
             opacity: 0.9;
         }
 
         .content {
-            padding: 15px;
+            padding: 20px;
+        }
+
+        .camera-section {
+            margin-bottom: 30px;
         }
 
         .camera-container {
             position: relative;
             width: 100%;
-            margin: 0 auto 15px;
-            border-radius: 10px;
+            max-width: 400px;
+            margin: 0 auto 20px;
+            border-radius: 15px;
             overflow: hidden;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
             background: #f8f9fa;
-            min-height: 250px;
         }
 
         #video {
             width: 100%;
             height: auto;
             display: block;
-        }
-
-        #capturedImage {
-            width: 100%;
-            height: auto;
-            display: none;
+            min-height: 200px;
         }
 
         #canvas {
@@ -97,22 +112,21 @@
         .controls {
             display: flex;
             justify-content: center;
-            gap: 10px;
-            margin-bottom: 15px;
+            gap: 15px;
+            margin-bottom: 20px;
             flex-wrap: wrap;
         }
 
         button {
-            padding: 12px 20px;
+            padding: 12px 24px;
             border: none;
             border-radius: 25px;
-            font-size: 14px;
+            font-size: 16px;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s ease;
-            min-width: 100px;
-            touch-action: manipulation;
-            -webkit-tap-highlight-color: transparent;
+            min-width: 140px;
+            text-align: center;
         }
 
         .btn-primary {
@@ -120,8 +134,9 @@
             color: white;
         }
 
-        .btn-primary:active {
-            transform: scale(0.95);
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
         }
 
         .btn-success {
@@ -129,59 +144,52 @@
             color: white;
         }
 
-        .btn-success:active {
-            transform: scale(0.95);
-        }
-
-        .btn-secondary {
-            background: linear-gradient(135deg, #6c757d, #495057);
-            color: white;
-        }
-
-        .btn-secondary:active {
-            transform: scale(0.95);
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(40, 167, 69, 0.4);
         }
 
         .status {
             text-align: center;
-            padding: 10px;
-            margin: 10px 0;
-            border-radius: 8px;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 10px;
             font-weight: 500;
-            font-size: 14px;
         }
 
         .status.processing {
             background: #fff3cd;
             color: #856404;
+            border: 1px solid #ffeaa7;
         }
 
         .status.success {
             background: #d4edda;
             color: #155724;
+            border: 1px solid #c3e6cb;
         }
 
         .status.error {
             background: #f8d7da;
             color: #721c24;
+            border: 1px solid #f5c6cb;
         }
 
         .result-section {
             background: #f8f9fa;
-            padding: 15px;
-            border-radius: 10px;
-            margin: 15px 0;
+            padding: 20px;
+            border-radius: 15px;
+            margin: 20px 0;
         }
 
         .result-section h3 {
             color: #495057;
-            margin-bottom: 15px;
+            margin-bottom: 20px;
             text-align: center;
-            font-size: 16px;
         }
 
         .form-group {
-            margin-bottom: 12px;
+            margin-bottom: 15px;
         }
 
         label {
@@ -189,65 +197,60 @@
             margin-bottom: 5px;
             font-weight: 600;
             color: #495057;
-            font-size: 14px;
         }
 
-        input, textarea {
+        input[type="text"], textarea {
             width: 100%;
-            padding: 10px;
+            padding: 12px;
             border: 2px solid #e9ecef;
             border-radius: 8px;
             font-size: 14px;
+            transition: border-color 0.3s ease;
             font-family: inherit;
-            -webkit-appearance: none;
-            -moz-appearance: none;
-            appearance: none;
         }
 
-        input:focus, textarea:focus {
+        input[type="text"]:focus, textarea:focus {
             outline: none;
             border-color: #667eea;
         }
 
         textarea {
-            height: 60px;
+            height: 80px;
             resize: vertical;
         }
 
         .data-list {
             background: white;
             border-radius: 10px;
-            padding: 12px;
-            margin-top: 15px;
-            max-height: 200px;
+            padding: 15px;
+            margin-top: 20px;
+            max-height: 300px;
             overflow-y: auto;
         }
 
         .data-list h3 {
             color: #495057;
-            margin-bottom: 10px;
+            margin-bottom: 15px;
             text-align: center;
-            font-size: 16px;
         }
 
         .data-item {
             background: #f8f9fa;
-            padding: 8px;
-            margin: 8px 0;
-            border-radius: 6px;
-            border-left: 3px solid #667eea;
-            font-size: 12px;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
         }
 
         .loading {
             display: inline-block;
-            width: 16px;
-            height: 16px;
+            width: 20px;
+            height: 20px;
             border: 2px solid #f3f3f3;
             border-top: 2px solid #667eea;
             border-radius: 50%;
             animation: spin 1s linear infinite;
-            margin-right: 8px;
+            margin-right: 10px;
         }
 
         @keyframes spin {
@@ -261,83 +264,64 @@
 
         .footer {
             text-align: center;
-            padding: 15px;
+            padding: 20px;
             color: #6c757d;
-            font-size: 11px;
+            font-size: 12px;
             border-top: 1px solid #e9ecef;
         }
 
-        /* 모바일 최적화 */
         @media (max-width: 480px) {
-            body {
-                padding: 2px;
-            }
-            
             .container {
-                margin: 2px;
-                border-radius: 10px;
+                margin: 5px;
+                border-radius: 15px;
             }
-            
-            .header {
-                padding: 12px;
-            }
-            
-            .content {
-                padding: 12px;
-            }
-            
-            button {
-                min-width: 90px;
-                font-size: 13px;
-                padding: 10px 16px;
-            }
-            
-            .controls {
-                gap: 8px;
-            }
-        }
 
-        /* iOS 사파리 최적화 */
-        @supports (-webkit-touch-callout: none) {
-            .camera-container {
-                -webkit-overflow-scrolling: touch;
+            .header h1 {
+                font-size: 20px;
             }
-            
-            input, textarea {
-                -webkit-appearance: none;
-                border-radius: 8px;
+
+            .content {
+                padding: 15px;
+            }
+
+            button {
+                min-width: 120px;
+                font-size: 14px;
+                padding: 10px 20px;
+            }
+
+            .controls {
+                gap: 10px;
             }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <header class="header">
+        <div class="header">
             <h1>🌸 화환 문구 인식 앱</h1>
             <p>화환을 촬영하여 자동으로 문구를 인식하고 기록합니다</p>
-        </header>
+        </div>
         
-        <main class="content">
-            <!-- 카메라 -->
-            <section class="camera-section">
+        <div class="content">
+            <!-- 카메라 섹션 -->
+            <div class="camera-section">
                 <div class="camera-container">
                     <video id="video" autoplay playsinline></video>
-                    <img id="capturedImage" alt="촬영된 이미지" />
                     <canvas id="canvas"></canvas>
                 </div>
                 
                 <div class="controls">
-                    <button id="startCameraBtn" class="btn-primary" onclick="startCamera()">📷 카메라 시작</button>
-                    <button id="captureBtn" class="btn-success" onclick="captureImage()">📸 촬영하기</button>
-                    <button id="retakeBtn" class="btn-secondary hidden" onclick="retakePhoto()">🔄 다시 촬영</button>
+                    <button class="btn-primary" onclick="startCamera()">📷 카메라 시작</button>
+                    <button class="btn-success" onclick="captureImage()">📸 촬영하기</button>
                 </div>
-            </section>
+            </div>
 
-            <!-- 상태 -->
+            <!-- 상태 표시 -->
             <div id="status" class="status hidden"></div>
 
-            <!-- 결과 -->
-            <section id="resultSection" class="result-section hidden">
+            <!-- 결과 섹션 -->
+            <div id="resultSection" class="result-section hidden">
                 <h3>📝 인식된 내용</h3>
                 <div class="form-group">
                     <label for="userName">사용자 이름:</label>
@@ -356,36 +340,40 @@
                     <textarea id="recognizedText" placeholder="인식된 전체 텍스트"></textarea>
                 </div>
                 <button class="btn-success" onclick="saveToSheets()">💾 스프레드시트에 저장</button>
-            </section>
+            </div>
 
-            <!-- 저장된 데이터 -->
-            <section class="data-list">
+            <!-- 저장된 데이터 목록 -->
+            <div id="dataList" class="data-list">
                 <h3>💾 저장된 데이터</h3>
                 <div id="savedItems"></div>
-            </section>
-        </main>
+            </div>
+        </div>
 
-        <footer class="footer">
+        <div class="footer">
             <p>🌸 화환 문구 인식 앱 v1.0</p>
-        </footer>
+        </div>
     </div>
 
     <script>
         // ==========================================
-        // 🔧 관리자 설정 - 아래 URL을 변경하세요!
+        // 🔧 관리자 필수 설정
         // ==========================================
-        const WEBAPP_URL = 'https://script.google.com/macros/s/AKfycbwUlqsgIHNMLu6W9TYNtip0imh_urSOnKf9mExN4FuJZ2o2-26rw-RZ60mX2vPI20EBlA/exec';
+        // Google Apps Script 웹앱 배포 후 
+        // 아래 URL을 실제 웹앱 URL로 변경하세요!
+        // 예: 'https://script.google.com/macros/s/AKfycbx.../exec'
+        // ==========================================
+        const WEBAPP_URL = 'https://script.google.com/macros/s/AKfycbyjaYb35BZZJcixwICOTlztvqYQmB5DtU9NWa4S6oZZrp8Nas4_9Hsv71I7-bO3_XQn1Q/exec';
         
         let video = document.getElementById('video');
         let canvas = document.getElementById('canvas');
-        let capturedImage = document.getElementById('capturedImage');
         let ctx = canvas.getContext('2d');
         let savedData = [];
-        let currentStream = null;
 
-        // 초기화
+        // 페이지 로드시 초기화
         window.onload = function() {
             loadSavedData();
+            
+            // 웹앱 URL 확인 (콘솔에서만 확인)
             if (WEBAPP_URL === 'https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec') {
                 console.warn('⚠️ 관리자가 WEBAPP_URL을 설정해야 합니다.');
             }
@@ -394,161 +382,64 @@
         // 카메라 시작
         async function startCamera() {
             try {
-                // 기존 스트림 정지
-                if (currentStream) {
-                    currentStream.getTracks().forEach(track => track.stop());
-                }
-
                 const stream = await navigator.mediaDevices.getUserMedia({
                     video: { 
                         facingMode: 'environment',
-                        width: { ideal: 1920, min: 1280 },
-                        height: { ideal: 1080, min: 720 }
+                        width: { ideal: 1280 },
+                        height: { ideal: 720 }
                     }
                 });
                 
-                currentStream = stream;
                 video.srcObject = stream;
-                
-                // UI 상태 변경
-                video.style.display = 'block';
-                capturedImage.style.display = 'none';
-                document.getElementById('startCameraBtn').style.display = 'inline-block';
-                document.getElementById('captureBtn').style.display = 'inline-block';
-                document.getElementById('retakeBtn').classList.add('hidden');
-                
-                showStatus('카메라가 준비되었습니다. 화환을 화면에 맞춰 촬영해주세요.', 'success');
+                showStatus('카메라가 준비되었습니다.', 'success');
             } catch (err) {
                 showStatus('카메라 접근 권한이 필요합니다.', 'error');
                 console.error('카메라 오류:', err);
             }
         }
 
-        // 촬영
+        // 이미지 촬영
         function captureImage() {
             if (!video.srcObject) {
                 showStatus('먼저 카메라를 시작해주세요.', 'error');
                 return;
             }
 
-            // 고해상도 캔버스 설정
             canvas.width = video.videoWidth;
             canvas.height = video.videoHeight;
-            
-            // 이미지 품질 향상을 위한 설정
-            ctx.imageSmoothingEnabled = false;
             ctx.drawImage(video, 0, 0);
             
-            // 캡처된 이미지 표시
-            const imageData = canvas.toDataURL('image/png', 1.0);
-            capturedImage.src = imageData;
-            
-            // UI 상태 변경
-            video.style.display = 'none';
-            capturedImage.style.display = 'block';
-            document.getElementById('captureBtn').style.display = 'none';
-            document.getElementById('retakeBtn').classList.remove('hidden');
-            
-            // 카메라 스트림 일시정지
-            if (currentStream) {
-                currentStream.getVideoTracks().forEach(track => track.enabled = false);
-            }
-            
-            showStatus('촬영 완료! 텍스트 인식을 시작합니다...', 'success');
-            
-            // 텍스트 인식 시작
-            setTimeout(() => {
-                recognizeText(imageData);
-            }, 500);
+            const imageData = canvas.toDataURL('image/png');
+            recognizeText(imageData);
         }
 
-        // 다시 촬영
-        function retakePhoto() {
-            // UI 상태 복원
-            video.style.display = 'block';
-            capturedImage.style.display = 'none';
-            document.getElementById('captureBtn').style.display = 'inline-block';
-            document.getElementById('retakeBtn').classList.add('hidden');
-            
-            // 카메라 스트림 재개
-            if (currentStream) {
-                currentStream.getVideoTracks().forEach(track => track.enabled = true);
-            }
-            
-            // 결과 섹션 숨기기
-            document.getElementById('resultSection').classList.add('hidden');
-            
-            showStatus('다시 촬영할 수 있습니다.', 'success');
-        }
-
-        // 이미지 전처리 함수
-        function preprocessImage(canvas, ctx) {
-            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-            const data = imageData.data;
-            
-            // 대비 및 밝기 향상
-            for (let i = 0; i < data.length; i += 4) {
-                // 회색조 변환
-                const gray = data[i] * 0.299 + data[i + 1] * 0.587 + data[i + 2] * 0.114;
-                
-                // 대비 증가
-                const contrast = 1.5;
-                const enhanced = Math.min(255, Math.max(0, (gray - 128) * contrast + 128));
-                
-                data[i] = enhanced;     // Red
-                data[i + 1] = enhanced; // Green  
-                data[i + 2] = enhanced; // Blue
-            }
-            
-            ctx.putImageData(imageData, 0, 0);
-            return canvas.toDataURL('image/png', 1.0);
-        }
-
-        // 텍스트 인식 (개선된 OCR)
+        // 텍스트 인식
         async function recognizeText(imageData) {
             showStatus('텍스트를 인식하고 있습니다...', 'processing');
             
             try {
-                // 이미지 전처리
-                const img = new Image();
-                img.onload = async function() {
-                    const tempCanvas = document.createElement('canvas');
-                    const tempCtx = tempCanvas.getContext('2d');
-                    tempCanvas.width = img.width;
-                    tempCanvas.height = img.height;
-                    tempCtx.drawImage(img, 0, 0);
-                    
-                    const processedImageData = preprocessImage(tempCanvas, tempCtx);
-                    
-                    // Tesseract 옵션 최적화 (화환 세로 문구용)
-                    const { data: { text } } = await Tesseract.recognize(
-                        processedImageData,
-                        'kor+eng',
-                        {
-                            logger: m => {
-                                if (m.status === 'recognizing text') {
-                                    showStatus(`텍스트 인식 중... ${Math.round(m.progress * 100)}%`, 'processing');
-                                }
-                            },
-                            tessedit_pageseg_mode: Tesseract.PSM.SINGLE_BLOCK_VERT_TEXT,
-                            tessedit_ocr_engine_mode: Tesseract.OEM.LSTM_ONLY,
-                            tessedit_char_whitelist: '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzㄱ-ㅎㅏ-ㅣ가-힣 .,!?()[]{}":;-_/\\',
-                            preserve_interword_spaces: '1'
+                const { data: { text } } = await Tesseract.recognize(
+                    imageData,
+                    'kor+eng',
+                    {
+                        logger: m => {
+                            if (m.status === 'recognizing text') {
+                                showStatus(`텍스트 인식 중... ${Math.round(m.progress * 100)}%`, 'processing');
+                            }
                         }
-                    );
+                    }
+                );
 
-                    processRecognizedText(text);
-                    showStatus('텍스트 인식이 완료되었습니다!', 'success');
-                };
-                img.src = imageData;
+                processRecognizedText(text);
+                showStatus('텍스트 인식이 완료되었습니다!', 'success');
                 
             } catch (error) {
-                showStatus('텍스트 인식에 실패했습니다. 다시 시도해주세요.', 'error');
+                showStatus('텍스트 인식에 실패했습니다.', 'error');
                 console.error('OCR 오류:', error);
             }
         }
 
-        // 텍스트 처리 (화환 문구 패턴 개선)
+        // 인식된 텍스트 처리
         function processRecognizedText(text) {
             document.getElementById('recognizedText').value = text;
             
@@ -558,34 +449,26 @@
                 document.getElementById('userName').value = savedUserName;
             }
             
-            // 개선된 파싱 로직 (세로 텍스트 고려)
-            const lines = text.split(/[\n\r]+/).filter(line => line.trim() !== '');
-            const cleanLines = lines.map(line => line.trim().replace(/[^\w\sㄱ-ㅎㅏ-ㅣ가-힣]/g, ' ').trim());
+            // 간단한 파싱 로직
+            const lines = text.split('\n').filter(line => line.trim() !== '');
             
             let sender = '';
             let message = '';
             
-            // 화환 문구 패턴 분석
-            for (let line of cleanLines) {
-                if (line.length < 2) continue;
+            // 보낸이와 메시지 추출 로직
+            for (let line of lines) {
+                line = line.trim();
                 
-                // 조의/축하 메시지 패턴
-                if (line.includes('삼가') || line.includes('고인') || line.includes('명복') || 
-                    line.includes('애도') || line.includes('조의') || line.includes('추도') ||
-                    line.includes('안식') || line.includes('영면') || line.includes('빕니다') ||
-                    line.includes('축하') || line.includes('개업') || line.includes('번영')) {
+                // 일반적인 화환 문구 패턴 분석
+                if (line.includes('삼가') || line.includes('고인') || line.includes('명복') || line.includes('애도')) {
                     message += (message ? ' ' : '') + line;
-                }
-                // 보낸이 패턴
-                else if (line.includes('드림') || line.includes('올림') || line.includes('일동') ||
-                         line.includes('회사') || line.includes('대표') || line.includes('사장') ||
-                         line.includes('이사') || line.includes('부장') || line.includes('과장')) {
+                } else if (line.includes('드림') || line.includes('올림') || line.includes('일동')) {
                     sender = line;
-                }
-                // 일반적인 이름 패턴 (2-5글자)
-                else if (line.length >= 2 && line.length <= 10 && /[가-힣]/.test(line)) {
-                    if (!sender && !line.includes('삼가') && !line.includes('축하')) {
+                } else if (line.length > 2 && line.length < 20 && !message) {
+                    if (!sender) {
                         sender = line;
+                    } else {
+                        message = line;
                     }
                 }
             }
@@ -596,22 +479,29 @@
             document.getElementById('resultSection').classList.remove('hidden');
         }
 
-        // 스프레드시트 저장
+        // 스프레드시트에 저장
         async function saveToSheets() {
             const userName = document.getElementById('userName').value.trim();
             
+            // 사용자 이름 확인
             if (!userName) {
                 showStatus('사용자 이름을 입력해주세요.', 'error');
                 return;
             }
             
+            // 사용자 이름 저장 (다음에 자동으로 채워지도록)
             localStorage.setItem('userName', userName);
             
+            const sender = document.getElementById('sender').value;
+            const message = document.getElementById('message').value;
+            const recognizedText = document.getElementById('recognizedText').value;
+            const timestamp = new Date().toLocaleString('ko-KR');
+            
             const data = {
-                timestamp: new Date().toLocaleString('ko-KR'),
-                sender: document.getElementById('sender').value,
-                message: document.getElementById('message').value,
-                recognizedText: document.getElementById('recognizedText').value,
+                timestamp,
+                sender,
+                message,
+                recognizedText,
                 user: userName
             };
             
@@ -688,9 +578,10 @@
                 return;
             }
             
+            // 최신 순으로 정렬
             const sortedData = [...savedData].reverse();
             
-            sortedData.forEach((item) => {
+            sortedData.forEach((item, index) => {
                 const itemEl = document.createElement('div');
                 itemEl.className = 'data-item';
                 itemEl.innerHTML = `
