@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>화환 문구 인식 앱</title>
+    <meta name="description" content="예식장, 장례식장 화환 문구를 자동으로 인식하여 구글 스프레드시트에 저장하는 웹앱">
+    
+    <!-- 
+    ==========================================
+    🌸 화환 문구 인식 앱 v1.0
+    ==========================================
+    
+    📋 관리자 설정 방법:
+    1. 구글 스프레드시트 생성
+    2. Apps Script에 code.gs 내용 붙여넣기
+    3. 웹앱으로 배포 (모든 사용자 액세스 허용)
+    4. 아래 WEBAPP_URL을 실제 웹앱 URL로 변경
+    5. GitHub Pages에 배포
+    
+    👥 사용 방법:
+    - 동료들은 앱 접속 후 바로 사용 가능
+    - 화환 촬영 → 자동 문구 인식 → 사용자 이름 입력 → 스프레드시트 저장
+    
+    ==========================================
+    -->
+    
+    <!-- PWA 메타 태그 -->
+    <meta name="theme-color" content="#667eea">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="화환 문구 인식">
+    
+    <!-- 파비콘 -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌸</text></svg>">
+    
+    <!-- Tesseract.js CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tesseract.js/4.1.1/tesseract.min.js"></script>
+    
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans KR', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 10px;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #ff6b6b, #ffd93d);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 24px;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .header p {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 20px;
+        }
+
+        .camera-section {
+            margin-bottom: 30px;
+        }
+
+        .camera-container {
+            position: relative;
+            width: 100%;
+            max-width: 400px;
+            margin: 0 auto 20px;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+            background: #f8f9fa;
+        }
+
+        #video {
+            width: 100%;
+            height: auto;
+            display: block;
+            min-height: 200px;
+        }
+
+        #canvas {
+            display: none;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            min-width: 140px;
+            text-align: center;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #28a745, #20c997);
+            color: white;
+        }
+
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(40, 167, 69, 0.4);
+        }
+
+        .status {
+            text-align: center;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 10px;
+            font-weight: 500;
+        }
+
+        .status.processing {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .result-section {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 15px;
+            margin: 20px 0;
+        }
+
+        .result-section h3 {
+            color: #495057;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #495057;
+        }
+
+        input[type="text"], textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s ease;
+            font-family: inherit;
+        }
+
+        input[type="text"]:focus, textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        textarea {
+            height: 80px;
+            resize: vertical;
+        }
+
+        .data-list {
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 20px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .data-list h3 {
+            color: #495057;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .data-item {
+            background: #f8f9fa;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 20px;
+            color: #6c757d;
+            font-size: 12px;
+            border-top: 1px solid #e9ecef;
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                margin: 5px;
+                border-radius: 15px;
+            }
+
+            .header h1 {
+                font-size: 20px;
+            }
+
+            .content {
+                padding: 15px;
+            }
+
+            button {
+                min-width: 120px;
+                font-size: 14px;
+                padding: 10px 20px;
+            }
+
+            .controls {
+                gap: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🌸 화환 문구 인식 앱</h1>
+            <p>화환을 촬영하여 자동으로 문구를 인식하고 기록합니다</p>
+        </div>
+        
+        <div class="content">
+            <!-- 카메라 섹션 -->
+            <div class="camera-section">
+                <div class="camera-container">
+                    <video id="video" autoplay playsinline></video>
+                    <canvas id="canvas"></canvas>
+                </div>
+                
+                <div class="controls">
+                    <button class="btn-primary" onclick="startCamera()">📷 카메라 시작</button>
+                    <button class="btn-success" onclick="captureImage()">📸 촬영하기</button>
+                </div>
+            </div>
+
+            <!-- 상태 표시 -->
+            <div id="status" class="status hidden"></div>
+
+            <!-- 결과 섹션 -->
+            <div id="resultSection" class="result-section hidden">
+                <h3>📝 인식된 내용</h3>
+                <div class="form-group">
+                    <label for="userName">사용자 이름:</label>
+                    <input type="text" id="userName" placeholder="홍길동" />
+                </div>
+                <div class="form-group">
+                    <label for="sender">보낸이:</label>
+                    <input type="text" id="sender" placeholder="자동 인식된 보낸이" />
+                </div>
+                <div class="form-group">
+                    <label for="message">메시지:</label>
+                    <textarea id="message" placeholder="자동 인식된 메시지"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="recognizedText">전체 인식 텍스트:</label>
+                    <textarea id="recognizedText" placeholder="인식된 전체 텍스트"></textarea>
+                </div>
+                <button class="btn-success" onclick="saveToSheets()">💾 스프레드시트에 저장</button>
+            </div>
+
+            <!-- 저장된 데이터 목록 -->
+            <div id="dataList" class="data-list">
+                <h3>💾 저장된 데이터</h3>
+                <div id="savedItems"></div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>🌸 화환 문구 인식 앱 v1.0</p>
+        </div>
+    </div>
+
+    <script>
+        // ==========================================
+        // 🔧 관리자 필수 설정
+        // ==========================================
+        // Google Apps Script 웹앱 배포 후 
+        // 아래 URL을 실제 웹앱 URL로 변경하세요!
+        // 예: 'https://script.google.com/macros/s/AKfycbx.../exec'
+        // ==========================================
+        const WEBAPP_URL = 'https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec';
+        
+        let video = document.getElementById('video');
+        let canvas = document.getElementById('canvas');
+        let ctx = canvas.getContext('2d');
+        let savedData = [];
+
+        // 페이지 로드시 초기화
+        window.onload = function() {
+            loadSavedData();
+            
+            // 웹앱 URL 확인 (콘솔에서만 확인)
+            if (WEBAPP_URL === 'https://script.google.com/macros/s/AKfycbwUlqsgIHNMLu6W9TYNtip0imh_urSOnKf9mExN4FuJZ2o2-26rw-RZ60mX2vPI20EBlA/exec') {
+                console.warn('⚠️ 관리자가 WEBAPP_URL을 설정해야 합니다.');
+            }
+        };
+
+        // 카메라 시작
+        async function startCamera() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({
+                    video: { 
+                        facingMode: 'environment',
+                        width: { ideal: 1280 },
+                        height: { ideal: 720 }
+                    }
+                });
+                
+                video.srcObject = stream;
+                showStatus('카메라가 준비되었습니다.', 'success');
+            } catch (err) {
+                showStatus('카메라 접근 권한이 필요합니다.', 'error');
+                console.error('카메라 오류:', err);
+            }
+        }
+
+        // 이미지 촬영
+        function captureImage() {
+            if (!video.srcObject) {
+                showStatus('먼저 카메라를 시작해주세요.', 'error');
+                return;
+            }
+
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            ctx.drawImage(video, 0, 0);
+            
+            const imageData = canvas.toDataURL('image/png');
+            recognizeText(imageData);
+        }
+
+        // 텍스트 인식
+        async function recognizeText(imageData) {
+            showStatus('텍스트를 인식하고 있습니다...', 'processing');
+            
+            try {
+                const { data: { text } } = await Tesseract.recognize(
+                    imageData,
+                    'kor+eng',
+                    {
+                        logger: m => {
+                            if (m.status === 'recognizing text') {
+                                showStatus(`텍스트 인식 중... ${Math.round(m.progress * 100)}%`, 'processing');
+                            }
+                        }
+                    }
+                );
+
+                processRecognizedText(text);
+                showStatus('텍스트 인식이 완료되었습니다!', 'success');
+                
+            } catch (error) {
+                showStatus('텍스트 인식에 실패했습니다.', 'error');
+                console.error('OCR 오류:', error);
+            }
+        }
+
+        // 인식된 텍스트 처리
+        function processRecognizedText(text) {
+            document.getElementById('recognizedText').value = text;
+            
+            // 저장된 사용자 이름 불러오기
+            const savedUserName = localStorage.getItem('userName');
+            if (savedUserName) {
+                document.getElementById('userName').value = savedUserName;
+            }
+            
+            // 간단한 파싱 로직
+            const lines = text.split('\n').filter(line => line.trim() !== '');
+            
+            let sender = '';
+            let message = '';
+            
+            // 보낸이와 메시지 추출 로직
+            for (let line of lines) {
+                line = line.trim();
+                
+                // 일반적인 화환 문구 패턴 분석
+                if (line.includes('삼가') || line.includes('고인') || line.includes('명복') || line.includes('애도')) {
+                    message += (message ? ' ' : '') + line;
+                } else if (line.includes('드림') || line.includes('올림') || line.includes('일동')) {
+                    sender = line;
+                } else if (line.length > 2 && line.length < 20 && !message) {
+                    if (!sender) {
+                        sender = line;
+                    } else {
+                        message = line;
+                    }
+                }
+            }
+            
+            document.getElementById('sender').value = sender;
+            document.getElementById('message').value = message;
+            
+            document.getElementById('resultSection').classList.remove('hidden');
+        }
+
+        // 스프레드시트에 저장
+        async function saveToSheets() {
+            const userName = document.getElementById('userName').value.trim();
+            
+            // 사용자 이름 확인
+            if (!userName) {
+                showStatus('사용자 이름을 입력해주세요.', 'error');
+                return;
+            }
+            
+            // 사용자 이름 저장 (다음에 자동으로 채워지도록)
+            localStorage.setItem('userName', userName);
+            
+            const sender = document.getElementById('sender').value;
+            const message = document.getElementById('message').value;
+            const recognizedText = document.getElementById('recognizedText').value;
+            const timestamp = new Date().toLocaleString('ko-KR');
+            
+            const data = {
+                timestamp,
+                sender,
+                message,
+                recognizedText,
+                user: userName
+            };
+            
+            // 로컬 저장
+            savedData.push(data);
+            localStorage.setItem('wreathData', JSON.stringify(savedData));
+            updateDataList();
+            
+            // 웹앱 URL 확인
+            if (WEBAPP_URL === 'https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec') {
+                showStatus('⚠️ 관리자가 웹앱 URL을 설정해야 합니다.', 'error');
+                return;
+            }
+            
+            try {
+                showStatus('스프레드시트에 저장 중...', 'processing');
+                
+                const response = await fetch(WEBAPP_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data)
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showStatus(`✅ 스프레드시트에 저장완료! (${userName})`, 'success');
+                } else {
+                    showStatus('❌ 저장 실패: ' + result.error, 'error');
+                }
+                
+                // 폼 초기화 (사용자 이름 제외)
+                document.getElementById('sender').value = '';
+                document.getElementById('message').value = '';
+                document.getElementById('recognizedText').value = '';
+                document.getElementById('resultSection').classList.add('hidden');
+                
+            } catch (error) {
+                showStatus('❌ 네트워크 오류로 저장에 실패했습니다.', 'error');
+                console.error('저장 오류:', error);
+            }
+        }
+
+        // 상태 표시
+        function showStatus(message, type) {
+            const statusEl = document.getElementById('status');
+            statusEl.textContent = message;
+            statusEl.className = `status ${type}`;
+            statusEl.classList.remove('hidden');
+            
+            if (type === 'processing') {
+                statusEl.innerHTML = '<span class="loading"></span>' + message;
+            }
+        }
+
+        // 저장된 데이터 불러오기
+        function loadSavedData() {
+            const saved = localStorage.getItem('wreathData');
+            if (saved) {
+                savedData = JSON.parse(saved);
+                updateDataList();
+            }
+        }
+
+        // 데이터 목록 업데이트
+        function updateDataList() {
+            const savedItems = document.getElementById('savedItems');
+            savedItems.innerHTML = '';
+            
+            if (savedData.length === 0) {
+                savedItems.innerHTML = '<p style="text-align: center; color: #6c757d; padding: 20px;">저장된 데이터가 없습니다.</p>';
+                return;
+            }
+            
+            // 최신 순으로 정렬
+            const sortedData = [...savedData].reverse();
+            
+            sortedData.forEach((item, index) => {
+                const itemEl = document.createElement('div');
+                itemEl.className = 'data-item';
+                itemEl.innerHTML = `
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
+                        <strong>${item.sender || '미상'}</strong>
+                        <small style="color: #6c757d;">${item.user || '익명'}</small>
+                    </div>
+                    <small style="color: #6c757d;">${item.timestamp}</small><br>
+                    <div style="margin-top: 5px;">${item.message || '메시지 없음'}</div>
+                `;
+                savedItems.appendChild(itemEl);
+            });
+        }
+    </script>
+</body>
+</html>
