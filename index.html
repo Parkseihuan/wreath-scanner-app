@@ -274,6 +274,17 @@
             font-size: 12px;
         }
 
+        .connection-test {
+            text-align: center;
+            padding: 15px;
+            margin-top: 10px;
+        }
+
+        .connection-test button {
+            width: 100%;
+            max-width: 250px;
+        }
+
         .loading {
             display: inline-block;
             width: 16px;
@@ -368,6 +379,11 @@
                 </div>
             </section>
 
+            <!-- 연결 테스트 -->
+            <section class="connection-test">
+                <button class="btn-secondary" onclick="testConnection()">🔧 연결 테스트</button>
+            </section>
+
             <!-- 상태 -->
             <div id="status" class="status hidden"></div>
 
@@ -388,7 +404,6 @@
                 </div>
                 <div class="controls">
                     <button class="btn-success" onclick="saveToSheets()">💾 스프레드시트에 저장</button>
-                    <button class="btn-secondary" onclick="testConnection()">🔧 연결 테스트</button>
                 </div>
             </section>
 
