@@ -43,6 +43,7 @@
     -->
     <meta name="theme-color" content="#667eea">
     <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-title" content="화환 문구 인식">
     
     <!-- 파비콘 -->
@@ -407,7 +408,7 @@
         // ==========================================
         // 🔧 관리자 설정 - 아래 URL을 변경하세요!
         // ==========================================
-        const WEBAPP_URL = 'https://script.google.com/macros/s/AKfycbwCurUHpxSVBVWMsGBYVTvEhZ8-FtTiDinxLsFvuK6JYjjuRlv8qa6hzkg8XXG0wPtz2w/exec';
+        const WEBAPP_URL = 'https://script.google.com/macros/s/AKfycbwHMX1dwIscTjGDGlOVNxYiTTqZuDhaSPGk6OGL7BH7Hk7KSZ-5u3-nOiCgksi3Dy0Zig/exec';
         
         let video = document.getElementById('video');
         let canvas = document.getElementById('canvas');
@@ -676,22 +677,20 @@
             document.getElementById('resultSection').classList.remove('hidden');
         }
 
-        // 연결 테스트 함수
+        // 연결 테스트 함수 (CORS 개선)
         async function testConnection() {
             showStatus('화환 웹앱 연결 테스트 중...', 'processing');
             
             try {
                 console.log('테스트 URL:', WEBAPP_URL);
                 
-                const response = await fetch(WEBAPP_URL, {
+                const response = await fetch(WEBAPP_URL + '?test=true', {
                     method: 'GET',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    }
+                    mode: 'cors',
+                    cache: 'no-cache'
                 });
                 
                 console.log('응답 상태:', response.status);
-                console.log('응답 헤더:', [...response.headers.entries()]);
                 
                 if (!response.ok) {
                     throw new Error(`HTTP ${response.status}: ${response.statusText}`);
@@ -710,14 +709,14 @@
                 console.error('연결 테스트 오류:', error);
                 
                 if (error.name === 'TypeError' && error.message.includes('Failed to fetch')) {
-                    showStatus('❌ 네트워크 오류: 웹앱 URL이 잘못되었거나 접근 권한이 없습니다.', 'error');
+                    showStatus('❌ 네트워크 오류: 웹앱을 다시 배포해야 할 수 있습니다.', 'error');
                 } else {
                     showStatus(`❌ 연결 실패: ${error.message}`, 'error');
                 }
             }
         }
 
-        // 스프레드시트 저장 (화환 전용)
+        // 스프레드시트 저장 (CORS 개선)
         async function saveToSheets() {
             const data = {
                 timestamp: new Date().toLocaleString('ko-KR'),
@@ -741,8 +740,10 @@
                 
                 const response = await fetch(WEBAPP_URL, {
                     method: 'POST',
+                    mode: 'cors',
+                    cache: 'no-cache',
                     headers: {
-                        'Content-Type': 'application/json',
+                        'Content-Type': 'application/json'
                     },
                     body: JSON.stringify(data)
                 });
@@ -774,9 +775,9 @@
                 console.error('저장 오류:', error);
                 
                 if (error.name === 'TypeError' && error.message.includes('Failed to fetch')) {
-                    showStatus('❌ 네트워크 연결 실패: 웹앱 URL 또는 권한을 확인하세요.', 'error');
+                    showStatus('❌ 네트워크 연결 실패: 웹앱을 새로 배포해주세요.', 'error');
                 } else if (error.message.includes('CORS')) {
-                    showStatus('❌ CORS 오류: 웹앱 배포 설정을 확인하세요.', 'error');
+                    showStatus('❌ CORS 오류: 웹앱을 새로 배포해주세요.', 'error');
                 } else {
                     showStatus(`❌ 저장 실패: ${error.message}`, 'error');
                 }
@@ -804,16 +805,17 @@
             }
         }
 
-        // 데이터 목록 업데이트
+        // 데이터 목록 업데이트 (화환 전용)
         function updateDataList() {
             const savedItems = document.getElementById('savedItems');
             savedItems.innerHTML = '';
             
             if (savedData.length === 0) {
-                savedItems.innerHTML = '<p style="text-align: center; color: #6c757d; padding: 20px;">저장된 데이터가 없습니다.</p>';
+                savedItems.innerHTML = '<p style="text-align: center; color: #6c757d; padding: 20px;">저장된 화환 데이터가 없습니다.</p>';
                 return;
             }
             
+            // 최신 순으로 정렬
             const sortedData = [...savedData].reverse();
             
             sortedData.forEach((item) => {
@@ -821,11 +823,17 @@
                 itemEl.className = 'data-item';
                 itemEl.innerHTML = `
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
-                        <strong>${item.sender || '미상'}</strong>
-                        <small style="color: #6c757d;">${item.user || '익명'}</small>
+                        <strong>🌸 화환 정보</strong>
+                        <small style="color: #6c757d;">${item.timestamp}</small>
                     </div>
-                    <small style="color: #6c757d;">${item.timestamp}</small><br>
-                    <div style="margin-top: 5px;">${item.message || '메시지 없음'}</div>
+                    <div style="margin-top: 8px;">
+                        <div style="background: #e3f2fd; padding: 6px; border-radius: 4px; margin-bottom: 4px;">
+                            <strong>좌측:</strong> ${item.leftRibbon || '없음'}
+                        </div>
+                        <div style="background: #f3e5f5; padding: 6px; border-radius: 4px;">
+                            <strong>우측:</strong> ${item.rightRibbon || '없음'}
+                        </div>
+                    </div>
                 `;
                 savedItems.appendChild(itemEl);
             });
