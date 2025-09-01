@@ -63,7 +63,7 @@
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
-            padding: 5px;
+            padding: 8px;
             margin: 0;
             -webkit-user-select: none;
             -moz-user-select: none;
@@ -72,7 +72,7 @@
         }
 
         .container {
-            max-width: 400px;
+            max-width: 420px;
             margin: 0 auto;
             background: white;
             border-radius: 15px;
@@ -83,105 +83,169 @@
         .header {
             background: linear-gradient(135deg, #ff6b6b, #ffd93d);
             color: white;
-            padding: 15px;
+            padding: 16px;
             text-align: center;
         }
 
         .header h1 {
-            font-size: 20px;
-            margin-bottom: 5px;
+            font-size: 22px;
+            margin-bottom: 6px;
             font-weight: 700;
         }
 
         .header p {
-            font-size: 12px;
+            font-size: 13px;
             opacity: 0.9;
         }
 
         .content {
-            padding: 15px;
+            padding: 16px;
         }
 
         .camera-container {
             position: relative;
             width: 100%;
-            margin: 0 auto 15px;
-            border-radius: 10px;
+            margin: 0 auto 20px;
+            border-radius: 12px;
             overflow: hidden;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.12);
             background: #f8f9fa;
-            min-height: 250px;
+            min-height: 280px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         #video {
             width: 100%;
             height: auto;
             display: block;
+            max-height: 400px;
+            object-fit: cover;
         }
 
         #capturedImage {
             width: 100%;
             height: auto;
             display: none;
+            max-height: 400px;
+            object-fit: contain;
         }
 
         #canvas {
             display: none;
         }
 
+        .camera-placeholder {
+            text-align: center;
+            color: #6c757d;
+            padding: 40px 20px;
+        }
+
+        .camera-placeholder .icon {
+            font-size: 48px;
+            margin-bottom: 12px;
+        }
+
         .controls {
             display: flex;
             justify-content: center;
-            gap: 10px;
-            margin-bottom: 15px;
+            gap: 12px;
+            margin-bottom: 20px;
             flex-wrap: wrap;
         }
 
         button {
-            padding: 12px 20px;
+            padding: 14px 24px;
             border: none;
-            border-radius: 25px;
-            font-size: 14px;
+            border-radius: 28px;
+            font-size: 15px;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s ease;
-            min-width: 100px;
+            min-width: 120px;
             touch-action: manipulation;
             -webkit-tap-highlight-color: transparent;
+            position: relative;
+            overflow: hidden;
+            min-height: 50px;
+        }
+
+        button:active {
+            transform: scale(0.96);
         }
 
         .btn-primary {
             background: linear-gradient(135deg, #667eea, #764ba2);
             color: white;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
         }
 
-        .btn-primary:active {
-            transform: scale(0.95);
+        .btn-primary:hover {
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
         }
 
         .btn-success {
             background: linear-gradient(135deg, #28a745, #20c997);
             color: white;
+            box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
         }
 
-        .btn-success:active {
-            transform: scale(0.95);
+        .btn-success:hover {
+            box-shadow: 0 6px 20px rgba(40, 167, 69, 0.4);
         }
 
         .btn-secondary {
             background: linear-gradient(135deg, #6c757d, #495057);
             color: white;
+            box-shadow: 0 4px 15px rgba(108, 117, 125, 0.3);
         }
 
-        .btn-secondary:active {
-            transform: scale(0.95);
+        .btn-secondary:hover {
+            box-shadow: 0 6px 20px rgba(108, 117, 125, 0.4);
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, #ffc107, #fd7e14);
+            color: white;
+            box-shadow: 0 4px 15px rgba(255, 193, 7, 0.3);
+        }
+
+        .btn-warning:hover {
+            box-shadow: 0 6px 20px rgba(255, 193, 7, 0.4);
+        }
+
+        /* 고정 하단 컨트롤 */
+        .fixed-controls {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(to top, rgba(255,255,255,0.98), rgba(255,255,255,0.95));
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            padding: 16px;
+            border-top: 1px solid rgba(0,0,0,0.1);
+            z-index: 1000;
+            box-shadow: 0 -5px 20px rgba(0,0,0,0.1);
+        }
+
+        .fixed-controls .controls {
+            max-width: 420px;
+            margin: 0 auto;
+            margin-bottom: 0;
+        }
+
+        /* 하단 컨트롤을 위한 여백 */
+        .content-with-fixed-controls {
+            margin-bottom: 100px;
         }
 
         .status {
             text-align: center;
-            padding: 10px;
-            margin: 10px 0;
-            border-radius: 8px;
+            padding: 12px;
+            margin: 12px 0;
+            border-radius: 10px;
             font-weight: 500;
             font-size: 14px;
         }
@@ -189,39 +253,43 @@
         .status.processing {
             background: #fff3cd;
             color: #856404;
+            border: 1px solid #ffeaa7;
         }
 
         .status.success {
             background: #d4edda;
             color: #155724;
+            border: 1px solid #c3e6cb;
         }
 
         .status.error {
             background: #f8d7da;
             color: #721c24;
+            border: 1px solid #f5c6cb;
         }
 
         .result-section {
             background: #f8f9fa;
-            padding: 15px;
-            border-radius: 10px;
-            margin: 15px 0;
+            padding: 18px;
+            border-radius: 12px;
+            margin: 18px 0;
+            border: 1px solid #e9ecef;
         }
 
         .result-section h3 {
             color: #495057;
-            margin-bottom: 15px;
+            margin-bottom: 16px;
             text-align: center;
-            font-size: 16px;
+            font-size: 17px;
         }
 
         .form-group {
-            margin-bottom: 12px;
+            margin-bottom: 14px;
         }
 
         label {
             display: block;
-            margin-bottom: 5px;
+            margin-bottom: 6px;
             font-weight: 600;
             color: #495057;
             font-size: 14px;
@@ -229,71 +297,75 @@
 
         input, textarea {
             width: 100%;
-            padding: 10px;
+            padding: 12px;
             border: 2px solid #e9ecef;
-            border-radius: 8px;
+            border-radius: 10px;
             font-size: 14px;
             font-family: inherit;
             -webkit-appearance: none;
             -moz-appearance: none;
             appearance: none;
+            transition: border-color 0.3s ease;
         }
 
         input:focus, textarea:focus {
             outline: none;
             border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
         }
 
         textarea {
-            height: 60px;
+            height: 70px;
             resize: vertical;
+            min-height: 50px;
         }
 
         .data-list {
             background: white;
-            border-radius: 10px;
-            padding: 12px;
-            margin-top: 15px;
-            max-height: 200px;
+            border-radius: 12px;
+            padding: 16px;
+            margin-top: 18px;
+            max-height: 250px;
             overflow-y: auto;
+            border: 1px solid #e9ecef;
         }
 
         .data-list h3 {
             color: #495057;
-            margin-bottom: 10px;
+            margin-bottom: 12px;
             text-align: center;
             font-size: 16px;
         }
 
         .data-item {
             background: #f8f9fa;
-            padding: 8px;
-            margin: 8px 0;
-            border-radius: 6px;
-            border-left: 3px solid #667eea;
-            font-size: 12px;
+            padding: 12px;
+            margin: 10px 0;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+            font-size: 13px;
         }
 
         .connection-test {
             text-align: center;
-            padding: 15px;
-            margin-top: 10px;
+            padding: 16px;
+            margin-top: 12px;
         }
 
         .connection-test button {
             width: 100%;
-            max-width: 250px;
+            max-width: 280px;
         }
 
         .loading {
             display: inline-block;
-            width: 16px;
-            height: 16px;
+            width: 18px;
+            height: 18px;
             border: 2px solid #f3f3f3;
             border-top: 2px solid #667eea;
             border-radius: 50%;
             animation: spin 1s linear infinite;
-            margin-right: 8px;
+            margin-right: 10px;
         }
 
         @keyframes spin {
@@ -302,44 +374,90 @@
         }
 
         .hidden {
-            display: none;
+            display: none !important;
         }
 
         .footer {
             text-align: center;
-            padding: 15px;
+            padding: 16px;
             color: #6c757d;
-            font-size: 11px;
+            font-size: 12px;
             border-top: 1px solid #e9ecef;
+        }
+
+        /* OCR 품질 향상 팁 */
+        .ocr-tips {
+            background: linear-gradient(135deg, #e3f2fd, #f3e5f5);
+            padding: 16px;
+            border-radius: 12px;
+            margin: 16px 0;
+            border: 1px solid #bbdefb;
+        }
+
+        .ocr-tips h4 {
+            color: #1976d2;
+            margin-bottom: 8px;
+            font-size: 15px;
+        }
+
+        .ocr-tips ul {
+            margin: 0;
+            padding-left: 16px;
+            color: #424242;
+            font-size: 13px;
+            line-height: 1.4;
+        }
+
+        .ocr-tips li {
+            margin-bottom: 4px;
         }
 
         /* 모바일 최적화 */
         @media (max-width: 480px) {
             body {
-                padding: 2px;
+                padding: 4px;
             }
             
             .container {
-                margin: 2px;
-                border-radius: 10px;
+                margin: 4px;
+                border-radius: 12px;
             }
             
             .header {
-                padding: 12px;
+                padding: 14px;
             }
             
             .content {
-                padding: 12px;
+                padding: 14px;
             }
             
             button {
-                min-width: 90px;
-                font-size: 13px;
-                padding: 10px 16px;
+                min-width: 110px;
+                font-size: 14px;
+                padding: 12px 20px;
+                min-height: 48px;
             }
             
             .controls {
-                gap: 8px;
+                gap: 10px;
+            }
+
+            .camera-container {
+                min-height: 250px;
+            }
+
+            .fixed-controls {
+                padding: 12px;
+            }
+        }
+
+        /* 초소형 화면 */
+        @media (max-width: 350px) {
+            button {
+                min-width: 100px;
+                font-size: 13px;
+                padding: 10px 16px;
+                min-height: 44px;
             }
         }
 
@@ -351,7 +469,18 @@
             
             input, textarea {
                 -webkit-appearance: none;
-                border-radius: 8px;
+                border-radius: 10px;
+            }
+
+            .fixed-controls {
+                padding-bottom: calc(16px + env(safe-area-inset-bottom));
+            }
+        }
+
+        /* 다크모드 대응 */
+        @media (prefers-color-scheme: dark) {
+            .camera-placeholder {
+                color: #8e9aaf;
             }
         }
     </style>
@@ -363,19 +492,29 @@
             <p>화환을 촬영하여 자동으로 문구를 인식하고 기록합니다</p>
         </header>
         
-        <main class="content">
+        <main class="content content-with-fixed-controls">
             <!-- 카메라 -->
             <section class="camera-section">
-                <div class="camera-container">
+                <div class="camera-container" id="cameraContainer">
+                    <div class="camera-placeholder">
+                        <div class="icon">📷</div>
+                        <p>카메라를 시작하려면<br>아래 버튼을 눌러주세요</p>
+                    </div>
                     <video id="video" autoplay playsinline></video>
                     <img id="capturedImage" alt="촬영된 이미지" />
                     <canvas id="canvas"></canvas>
                 </div>
-                
-                <div class="controls">
-                    <button id="startCameraBtn" class="btn-primary" onclick="startCamera()">📷 카메라 시작</button>
-                    <button id="captureBtn" class="btn-success" onclick="captureImage()">📸 촬영하기</button>
-                    <button id="retakeBtn" class="btn-secondary hidden" onclick="retakePhoto()">🔄 다시 촬영</button>
+
+                <!-- OCR 품질 향상 팁 -->
+                <div class="ocr-tips">
+                    <h4>📝 인식률 향상 팁</h4>
+                    <ul>
+                        <li>밝은 곳에서 촬영하세요</li>
+                        <li>화환 리본이 화면 중앙에 오도록 하세요</li>
+                        <li>카메라와 리본이 수직이 되도록 하세요</li>
+                        <li>글자가 선명하게 보이도록 가까이 촬영하세요</li>
+                        <li>그림자가 없는 곳에서 촬영하세요</li>
+                    </ul>
                 </div>
             </section>
 
@@ -409,13 +548,23 @@
 
             <!-- 저장된 데이터 -->
             <section class="data-list">
-                <h3>💾 저장된 데이터</h3>
+                <h3>💾 최근 저장된 데이터</h3>
                 <div id="savedItems"></div>
             </section>
         </main>
 
+        <!-- 고정 하단 컨트롤 -->
+        <div class="fixed-controls">
+            <div class="controls">
+                <button id="startCameraBtn" class="btn-primary" onclick="startCamera()">📷 카메라 시작</button>
+                <button id="captureBtn" class="btn-success hidden" onclick="captureImage()">📸 촬영하기</button>
+                <button id="retakeBtn" class="btn-warning hidden" onclick="retakePhoto()">🔄 다시 촬영</button>
+                <button id="enhanceBtn" class="btn-warning hidden" onclick="enhanceAndRecognize()">✨ 인식 향상</button>
+            </div>
+        </div>
+
         <footer class="footer">
-            <p>🌸 화환 문구 인식 앱 v1.0</p>
+            <p>🌸 화환 문구 인식 앱 v2.0 - 인식률 개선 버전</p>
         </footer>
     </div>
 
@@ -431,6 +580,7 @@
         let ctx = canvas.getContext('2d');
         let savedData = [];
         let currentStream = null;
+        let isProcessing = false;
 
         // 초기화 (자동 연결 확인)
         window.onload = function() {
@@ -441,7 +591,8 @@
                 try {
                     const response = await fetch(WEBAPP_URL, {
                         method: 'GET',
-                        headers: { 'Content-Type': 'application/json' }
+                        headers: { 'Content-Type': 'application/json' },
+                        mode: 'cors'
                     });
                     
                     if (response.ok) {
@@ -455,7 +606,7 @@
                     console.warn('자동 연결 확인 실패:', error.message);
                     showStatus('⚠️ 웹앱 연결을 확인하려면 "연결 테스트" 버튼을 클릭하세요.', 'error');
                 }
-            }, 1000);
+            }, 1500);
         };
 
         // 카메라 시작
@@ -469,24 +620,34 @@
                 const stream = await navigator.mediaDevices.getUserMedia({
                     video: { 
                         facingMode: 'environment',
-                        width: { ideal: 1920, min: 1280 },
-                        height: { ideal: 1080, min: 720 }
+                        width: { ideal: 2560, min: 1920 },
+                        height: { ideal: 1440, min: 1080 }
                     }
                 });
                 
                 currentStream = stream;
                 video.srcObject = stream;
                 
+                // 카메라 플레이스홀더 숨기기
+                document.querySelector('.camera-placeholder').style.display = 'none';
+                
                 // UI 상태 변경
                 video.style.display = 'block';
                 capturedImage.style.display = 'none';
-                document.getElementById('startCameraBtn').style.display = 'inline-block';
-                document.getElementById('captureBtn').style.display = 'inline-block';
+                document.getElementById('startCameraBtn').style.display = 'none';
+                document.getElementById('captureBtn').classList.remove('hidden');
                 document.getElementById('retakeBtn').classList.add('hidden');
+                document.getElementById('enhanceBtn').classList.add('hidden');
                 
-                showStatus('카메라가 준비되었습니다. 화환을 화면에 맞춰 촬영해주세요.', 'success');
+                showStatus('카메라가 준비되었습니다. 화환 리본이 선명하게 보이도록 위치를 조정해주세요.', 'success');
+                
+                // 카메라가 완전히 로드될 때까지 기다림
+                video.addEventListener('loadedmetadata', function() {
+                    console.log(`카메라 해상도: ${video.videoWidth}x${video.videoHeight}`);
+                });
+                
             } catch (err) {
-                showStatus('카메라 접근 권한이 필요합니다.', 'error');
+                showStatus('카메라 접근 권한이 필요합니다. 브라우저 설정을 확인해주세요.', 'error');
                 console.error('카메라 오류:', err);
             }
         }
@@ -513,8 +674,9 @@
             // UI 상태 변경
             video.style.display = 'none';
             capturedImage.style.display = 'block';
-            document.getElementById('captureBtn').style.display = 'none';
+            document.getElementById('captureBtn').classList.add('hidden');
             document.getElementById('retakeBtn').classList.remove('hidden');
+            document.getElementById('enhanceBtn').classList.remove('hidden');
             
             // 카메라 스트림 일시정지
             if (currentStream) {
@@ -526,7 +688,7 @@
             // 텍스트 인식 시작
             setTimeout(() => {
                 recognizeText(imageData);
-            }, 500);
+            }, 800);
         }
 
         // 다시 촬영
@@ -534,8 +696,9 @@
             // UI 상태 복원
             video.style.display = 'block';
             capturedImage.style.display = 'none';
-            document.getElementById('captureBtn').style.display = 'inline-block';
+            document.getElementById('captureBtn').classList.remove('hidden');
             document.getElementById('retakeBtn').classList.add('hidden');
+            document.getElementById('enhanceBtn').classList.add('hidden');
             
             // 카메라 스트림 재개
             if (currentStream) {
@@ -548,14 +711,26 @@
             showStatus('다시 촬영할 수 있습니다.', 'success');
         }
 
-        // 이미지 전처리 함수 제거 (preprocessImage -> preprocessForWreath으로 통합)
+        // 향상된 인식 재시도
+        function enhanceAndRecognize() {
+            if (!capturedImage.src) {
+                showStatus('먼저 사진을 촬영해주세요.', 'error');
+                return;
+            }
+            
+            showStatus('고급 인식 모드로 다시 분석 중...', 'processing');
+            recognizeTextEnhanced(capturedImage.src);
+        }
 
-        // 텍스트 인식 (화환 세로 문구 전용 최적화)
+        // 기본 텍스트 인식 (화환 세로 문구 전용 최적화)
         async function recognizeText(imageData) {
+            if (isProcessing) return;
+            isProcessing = true;
+            
             showStatus('화환 문구를 인식하고 있습니다...', 'processing');
             
             try {
-                // 이미지 전처리 (더 강화된 버전)
+                // 이미지 전처리
                 const img = new Image();
                 img.onload = async function() {
                     const tempCanvas = document.createElement('canvas');
@@ -567,43 +742,106 @@
                     // 화환 전용 이미지 전처리
                     const processedImageData = preprocessForWreath(tempCanvas, tempCtx);
                     
-                    // Tesseract 세로 텍스트 전용 설정
+                    // Tesseract 한글/한자 최적화 설정
                     const { data: { text } } = await Tesseract.recognize(
                         processedImageData,
-                        'kor+eng',
+                        'kor+chi_sim+chi_tra+eng',
                         {
                             logger: m => {
                                 if (m.status === 'recognizing text') {
                                     showStatus(`화환 문구 인식 중... ${Math.round(m.progress * 100)}%`, 'processing');
                                 }
                             },
-                            // 화환 리본 전용 OCR 설정
-                            tessedit_pageseg_mode: Tesseract.PSM.SINGLE_COLUMN,
+                            // 화환 리본 전용 OCR 설정 강화
+                            tessedit_pageseg_mode: Tesseract.PSM.SINGLE_BLOCK_VERT_TEXT,
                             tessedit_ocr_engine_mode: Tesseract.OEM.LSTM_ONLY,
-                            tessedit_char_whitelist: '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzㄱ-ㅎㅏ-ㅣ가-힣 .,!?()[]{}":;-_/\\㈜주식회사',
+                            tessedit_char_whitelist: '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzㄱ-ㅎㅏ-ㅣ가-힣一-龯 .,!?()[]{}":;-_/\\㈜株式会사주식회社드림올림삼가애도조의축하고인명복영면안식',
                             preserve_interword_spaces: '1',
-                            // 세로 읽기 우선
-                            textord_tabfind_vertical_text: '1'
+                            textord_tabfind_vertical_text: '1',
+                            textord_heavy_nr: '1'
                         }
                     );
 
                     processWreathText(text);
-                    showStatus('화환 문구 인식이 완료되었습니다!', 'success');
+                    showStatus('화환 문구 인식이 완료되었습니다! 결과를 확인하고 수정해주세요.', 'success');
+                    isProcessing = false;
                 };
                 img.src = imageData;
                 
             } catch (error) {
-                showStatus('화환 문구 인식에 실패했습니다. 조명이 밝은 곳에서 다시 시도해주세요.', 'error');
+                showStatus('화환 문구 인식에 실패했습니다. "인식 향상" 버튼을 시도해보세요.', 'error');
                 console.error('OCR 오류:', error);
+                isProcessing = false;
             }
         }
 
-        // 화환 전용 이미지 전처리
+        // 향상된 텍스트 인식
+        async function recognizeTextEnhanced(imageData) {
+            if (isProcessing) return;
+            isProcessing = true;
+            
+            try {
+                const img = new Image();
+                img.onload = async function() {
+                    const tempCanvas = document.createElement('canvas');
+                    const tempCtx = tempCanvas.getContext('2d');
+                    tempCanvas.width = img.width;
+                    tempCanvas.height = img.height;
+                    tempCtx.drawImage(img, 0, 0);
+                    
+                    // 더 강화된 이미지 전처리
+                    const processedImageData = preprocessForWreathEnhanced(tempCanvas, tempCtx);
+                    
+                    // 다중 OCR 시도로 정확도 향상
+                    const recognitionPromises = [
+                        // 세로 텍스트 모드
+                        Tesseract.recognize(processedImageData, 'kor+chi_sim+chi_tra+eng', {
+                            tessedit_pageseg_mode: Tesseract.PSM.SINGLE_BLOCK_VERT_TEXT,
+                            tessedit_ocr_engine_mode: Tesseract.OEM.LSTM_ONLY,
+                            logger: m => {
+                                if (m.status === 'recognizing text') {
+                                    showStatus(`고급 인식 모드 (세로) ${Math.round(m.progress * 100)}%`, 'processing');
+                                }
+                            }
+                        }),
+                        // 단일 컬럼 모드
+                        Tesseract.recognize(processedImageData, 'kor+chi_sim+chi_tra+eng', {
+                            tessedit_pageseg_mode: Tesseract.PSM.SINGLE_COLUMN,
+                            tessedit_ocr_engine_mode: Tesseract.OEM.LSTM_ONLY,
+                            logger: m => {
+                                if (m.status === 'recognizing text') {
+                                    showStatus(`고급 인식 모드 (컬럼) ${Math.round(m.progress * 100)}%`, 'processing');
+                                }
+                            }
+                        })
+                    ];
+
+                    const results = await Promise.all(recognitionPromises);
+                    
+                    // 가장 긴 결과 선택 (보통 더 정확함)
+                    const bestResult = results.reduce((best, current) => 
+                        current.data.text.length > best.data.text.length ? current : best
+                    );
+
+                    processWreathText(bestResult.data.text);
+                    showStatus('✨ 고급 인식 모드 완료! 결과를 확인하고 필요시 수정해주세요.', 'success');
+                    isProcessing = false;
+                };
+                img.src = imageData;
+                
+            } catch (error) {
+                showStatus('고급 인식 모드에서도 실패했습니다. 조명을 밝게 하고 다시 촬영해보세요.', 'error');
+                console.error('고급 OCR 오류:', error);
+                isProcessing = false;
+            }
+        }
+
+        // 화환 전용 이미지 전처리 (강화 버전)
         function preprocessForWreath(canvas, ctx) {
             const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
             const data = imageData.data;
             
-            // 화환 리본 텍스트 강조를 위한 전처리
+            // 화환 리본 텍스트 강조를 위한 전처리 강화
             for (let i = 0; i < data.length; i += 4) {
                 const r = data[i];
                 const g = data[i + 1];
@@ -612,14 +850,17 @@
                 // 회색조 변환
                 const gray = r * 0.299 + g * 0.587 + b * 0.114;
                 
-                // 화환 리본 텍스트 (보통 어두운 글씨) 강조
+                // 더 강한 대비 적용
                 let enhanced;
-                if (gray < 120) {
+                if (gray < 100) {
                     // 어두운 부분(텍스트) 더 어둡게
-                    enhanced = Math.max(0, gray * 0.3);
-                } else {
+                    enhanced = Math.max(0, gray * 0.2);
+                } else if (gray > 180) {
                     // 밝은 부분(배경) 더 밝게  
-                    enhanced = Math.min(255, gray * 1.3 + 50);
+                    enhanced = 255;
+                } else {
+                    // 중간톤 처리
+                    enhanced = gray < 140 ? gray * 0.4 : Math.min(255, gray * 1.5);
                 }
                 
                 data[i] = enhanced;     // Red
@@ -631,27 +872,101 @@
             return canvas.toDataURL('image/png', 1.0);
         }
 
-        // 화환 텍스트 처리 (좌/우 리본 구분)
+        // 향상된 이미지 전처리
+        function preprocessForWreathEnhanced(canvas, ctx) {
+            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            const data = imageData.data;
+            
+            // 1단계: 노이즈 제거를 위한 평균 필터
+            const filteredData = new Uint8ClampedArray(data);
+            const width = canvas.width;
+            const height = canvas.height;
+            
+            for (let y = 1; y < height - 1; y++) {
+                for (let x = 1; x < width - 1; x++) {
+                    const idx = (y * width + x) * 4;
+                    
+                    // 3x3 커널 평균
+                    let rSum = 0, gSum = 0, bSum = 0;
+                    for (let dy = -1; dy <= 1; dy++) {
+                        for (let dx = -1; dx <= 1; dx++) {
+                            const nIdx = ((y + dy) * width + (x + dx)) * 4;
+                            rSum += data[nIdx];
+                            gSum += data[nIdx + 1];
+                            bSum += data[nIdx + 2];
+                        }
+                    }
+                    
+                    filteredData[idx] = rSum / 9;
+                    filteredData[idx + 1] = gSum / 9;
+                    filteredData[idx + 2] = bSum / 9;
+                }
+            }
+            
+            // 2단계: 강화된 대비 적용
+            for (let i = 0; i < filteredData.length; i += 4) {
+                const r = filteredData[i];
+                const g = filteredData[i + 1];
+                const b = filteredData[i + 2];
+                
+                const gray = r * 0.299 + g * 0.587 + b * 0.114;
+                
+                // 이진화에 가까운 강한 대비
+                const enhanced = gray < 120 ? 0 : 255;
+                
+                filteredData[i] = enhanced;
+                filteredData[i + 1] = enhanced;
+                filteredData[i + 2] = enhanced;
+            }
+            
+            const enhancedImageData = new ImageData(filteredData, width, height);
+            ctx.putImageData(enhancedImageData, 0, 0);
+            return canvas.toDataURL('image/png', 1.0);
+        }
+
+        // 화환 텍스트 처리 (좌/우 리본 구분) - 강화 버전
         function processWreathText(text) {
+            console.log('원본 텍스트:', text);
+            
             document.getElementById('recognizedText').value = text;
+            
+            // 텍스트 정리
+            const cleanedText = text
+                .replace(/[^\w\sㄱ-ㅎㅏ-ㅣ가-힣一-龯㈜株式会사().,!?\-_]/g, ' ')
+                .replace(/\s+/g, ' ')
+                .trim();
             
             // 텍스트를 줄별로 분리
             const lines = text.split(/[\n\r]+/)
                 .filter(line => line.trim() !== '')
-                .map(line => line.trim().replace(/[^\w\sㄱ-ㅎㅏ-ㅣ가-힣㈜]/g, ''))
+                .map(line => line.trim()
+                    .replace(/[^\w\sㄱ-ㅎㅏ-ㅣ가-힣一-龯㈜株式会사().,!?\-_]/g, ' ')
+                    .replace(/\s+/g, ' ')
+                    .trim()
+                )
                 .filter(line => line.length > 0);
             
-            console.log('인식된 라인들:', lines);
+            console.log('정제된 라인들:', lines);
             
-            // 좌측/우측 리본 구분 로직
+            // 좌측/우측 리본 구분 로직 강화
             let leftRibbon = '';
             let rightRibbon = '';
             
-            // 화환은 보통 좌측이 축하/조의 메시지, 우측이 보낸이
-            // 또는 텍스트 위치에 따라 자동 구분
+            // 화환 키워드 확장
+            const leftKeywords = [
+                '축하', '삼가', '고인', '명복', '조의', '애도', '추모', '영면', '안식',
+                '축', '조', '哀悼', '追慕', '冥福', '安息', '永眠', '故人',
+                '축복', '기원', '기념', '경축', '개업', '개점', '창립'
+            ];
+            const rightKeywords = [
+                '드림', '올림', '일동', '회사', '그룹', '대표', '사장', '㈜', '주식회사',
+                '株式会社', '代表', '社長', '임직원', '직원', '가족', '친구', '동료',
+                '상', '배상', '敬上', '拜上', '謹弔'
+            ];
             
-            const leftKeywords = ['축하', '삼가', '고인', '명복', '조의', '애도', '추모', '영면', '안식'];
-            const rightKeywords = ['드림', '올림', '일동', '회사', '그룹', '대표', '사장', '㈜', '주식회사'];
+            const leftLines = [];
+            const rightLines = [];
+            const neutralLines = [];
             
             for (let line of lines) {
                 if (line.length < 2) continue;
@@ -660,20 +975,27 @@
                 const hasRightKeyword = rightKeywords.some(keyword => line.includes(keyword));
                 
                 if (hasLeftKeyword && !hasRightKeyword) {
-                    leftRibbon += (leftRibbon ? ' ' : '') + line;
+                    leftLines.push(line);
                 } else if (hasRightKeyword && !hasLeftKeyword) {
-                    rightRibbon += (rightRibbon ? ' ' : '') + line;
+                    rightLines.push(line);
                 } else {
-                    // 키워드가 없는 경우, 길이나 위치로 판단
-                    if (leftRibbon.length <= rightRibbon.length) {
-                        leftRibbon += (leftRibbon ? ' ' : '') + line;
-                    } else {
-                        rightRibbon += (rightRibbon ? ' ' : '') + line;
-                    }
+                    neutralLines.push(line);
                 }
             }
             
-            // 만약 한쪽만 인식된 경우, 전체를 반반 나누기
+            // 중성 라인들을 길이 기준으로 배분
+            for (let line of neutralLines) {
+                if (leftLines.join(' ').length <= rightLines.join(' ').length) {
+                    leftLines.push(line);
+                } else {
+                    rightLines.push(line);
+                }
+            }
+            
+            leftRibbon = leftLines.join(' ');
+            rightRibbon = rightLines.join(' ');
+            
+            // 만약 한쪽이 비어있다면 전체 텍스트를 반반 나누기
             if (!leftRibbon && rightRibbon) {
                 const words = rightRibbon.split(' ');
                 const mid = Math.ceil(words.length / 2);
@@ -692,20 +1014,29 @@
             document.getElementById('resultSection').classList.remove('hidden');
         }
 
-        // 연결 테스트 함수 (CORS 개선)
+        // 연결 테스트 함수 (강화된 오류 처리)
         async function testConnection() {
             showStatus('화환 웹앱 연결 테스트 중...', 'processing');
             
             try {
                 console.log('테스트 URL:', WEBAPP_URL);
                 
-                const response = await fetch(WEBAPP_URL + '?test=true', {
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 10000); // 10초 타임아웃
+                
+                const response = await fetch(WEBAPP_URL + '?test=true&_=' + Date.now(), {
                     method: 'GET',
                     mode: 'cors',
-                    cache: 'no-cache'
+                    cache: 'no-cache',
+                    signal: controller.signal,
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
                 });
                 
-                console.log('응답 상태:', response.status);
+                clearTimeout(timeoutId);
+                
+                console.log('응답 상태:', response.status, response.statusText);
                 
                 if (!response.ok) {
                     throw new Error(`HTTP ${response.status}: ${response.statusText}`);
@@ -715,33 +1046,54 @@
                 console.log('테스트 결과:', result);
                 
                 if (result.success) {
-                    showStatus(`✅ 연결 성공! 시트: ${result.sheetName}, 저장된 화환 데이터: ${result.totalRows}개`, 'success');
+                    showStatus(`✅ 연결 성공! 시트: ${result.sheetName || 'N/A'}, 화환 데이터: ${result.totalRows || 0}개`, 'success');
                 } else {
-                    showStatus(`❌ 서버 오류: ${result.message}`, 'error');
+                    showStatus(`❌ 서버 응답 오류: ${result.message}`, 'error');
                 }
                 
             } catch (error) {
                 console.error('연결 테스트 오류:', error);
                 
-                if (error.name === 'TypeError' && error.message.includes('Failed to fetch')) {
-                    showStatus('❌ 네트워크 오류: 웹앱을 다시 배포해야 할 수 있습니다.', 'error');
+                if (error.name === 'AbortError') {
+                    showStatus('❌ 연결 시간 초과: 웹앱 URL을 확인하거나 새로 배포해주세요.', 'error');
+                } else if (error.name === 'TypeError' && error.message.includes('Failed to fetch')) {
+                    showStatus('❌ 네트워크 오류: 인터넷 연결과 웹앱 URL을 확인해주세요.', 'error');
+                } else if (error.message.includes('CORS')) {
+                    showStatus('❌ CORS 오류: Apps Script를 새로 배포해주세요.', 'error');
                 } else {
                     showStatus(`❌ 연결 실패: ${error.message}`, 'error');
                 }
             }
         }
 
-        // 스프레드시트 저장 (CORS 개선)
-        async function saveToSheets() {
+        // 스프레드시트 저장 (강화된 오류 처리 및 재시도)
+        async function saveToSheets(retryCount = 0) {
             const data = {
-                timestamp: new Date().toLocaleString('ko-KR'),
-                leftRibbon: document.getElementById('leftRibbon').value,
-                rightRibbon: document.getElementById('rightRibbon').value,
-                recognizedText: document.getElementById('recognizedText').value
+                timestamp: new Date().toLocaleString('ko-KR', {
+                    timeZone: 'Asia/Seoul',
+                    year: 'numeric',
+                    month: '2-digit',
+                    day: '2-digit',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    second: '2-digit'
+                }),
+                leftRibbon: document.getElementById('leftRibbon').value.trim(),
+                rightRibbon: document.getElementById('rightRibbon').value.trim(),
+                recognizedText: document.getElementById('recognizedText').value.trim()
             };
             
+            // 데이터 검증
+            if (!data.leftRibbon && !data.rightRibbon && !data.recognizedText) {
+                showStatus('저장할 화환 데이터가 없습니다. 먼저 텍스트를 인식해주세요.', 'error');
+                return;
+            }
+            
             // 로컬 저장
-            savedData.push(data);
+            savedData.unshift(data); // 최신 데이터를 앞에 추가
+            if (savedData.length > 50) { // 최대 50개만 보관
+                savedData = savedData.slice(0, 50);
+            }
             localStorage.setItem('wreathData', JSON.stringify(savedData));
             updateDataList();
             
@@ -750,20 +1102,28 @@
                 
                 console.log('화환 데이터 저장 시도:', {
                     url: WEBAPP_URL,
-                    data: data
+                    data: data,
+                    attempt: retryCount + 1
                 });
                 
-                const response = await fetch(WEBAPP_URL, {
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 15000); // 15초 타임아웃
+                
+                const response = await fetch(WEBAPP_URL + '?_=' + Date.now(), {
                     method: 'POST',
                     mode: 'cors',
                     cache: 'no-cache',
+                    signal: controller.signal,
                     headers: {
-                        'Content-Type': 'application/json'
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
                     },
                     body: JSON.stringify(data)
                 });
                 
-                console.log('응답 상태:', response.status);
+                clearTimeout(timeoutId);
+                
+                console.log('저장 응답 상태:', response.status, response.statusText);
                 
                 if (!response.ok) {
                     throw new Error(`HTTP ${response.status}: ${response.statusText}`);
@@ -773,7 +1133,7 @@
                 console.log('저장 결과:', result);
                 
                 if (result.success) {
-                    showStatus(`✅ 화환 정보 저장 완료! - 행 번호: ${result.rowNumber}`, 'success');
+                    showStatus(`✅ 화환 정보 저장 완료! (행: ${result.rowNumber || 'N/A'})`, 'success');
                     
                     // 폼 초기화
                     document.getElementById('leftRibbon').value = '';
@@ -781,33 +1141,70 @@
                     document.getElementById('recognizedText').value = '';
                     document.getElementById('resultSection').classList.add('hidden');
                     
+                    // 다시 촬영 준비
+                    setTimeout(() => {
+                        showStatus('새로운 화환을 촬영할 준비가 되었습니다.', 'success');
+                    }, 2000);
+                    
                 } else {
-                    showStatus(`❌ 서버 저장 실패: ${result.message || result.error}`, 'error');
-                    console.error('서버 오류:', result);
+                    throw new Error(result.message || result.error || '저장 실패');
                 }
                 
             } catch (error) {
                 console.error('저장 오류:', error);
                 
-                if (error.name === 'TypeError' && error.message.includes('Failed to fetch')) {
-                    showStatus('❌ 네트워크 연결 실패: 웹앱을 새로 배포해주세요.', 'error');
+                // 재시도 로직 (최대 2회)
+                if (retryCount < 2 && (
+                    error.name === 'AbortError' || 
+                    error.name === 'TypeError' ||
+                    error.message.includes('network')
+                )) {
+                    console.log(`재시도 중... (${retryCount + 1}/2)`);
+                    showStatus(`저장 재시도 중... (${retryCount + 2}/3)`, 'processing');
+                    
+                    setTimeout(() => {
+                        saveToSheets(retryCount + 1);
+                    }, 2000);
+                    return;
+                }
+                
+                // 오류 메시지 개선
+                if (error.name === 'AbortError') {
+                    showStatus('❌ 저장 시간 초과: 네트워크 상태를 확인해주세요.', 'error');
+                } else if (error.name === 'TypeError' && error.message.includes('Failed to fetch')) {
+                    showStatus('❌ 네트워크 연결 실패: 인터넷 연결과 웹앱 URL을 확인해주세요.', 'error');
                 } else if (error.message.includes('CORS')) {
-                    showStatus('❌ CORS 오류: 웹앱을 새로 배포해주세요.', 'error');
+                    showStatus('❌ CORS 오류: Apps Script를 새로 배포해주세요.', 'error');
                 } else {
                     showStatus(`❌ 저장 실패: ${error.message}`, 'error');
                 }
+                
+                // 로컬에는 저장되었음을 알림
+                setTimeout(() => {
+                    showStatus('💾 로컬 저장은 완료되었습니다. 네트워크 확인 후 다시 시도해주세요.', 'success');
+                }, 3000);
             }
         }
 
-        // 상태 표시
+        // 상태 표시 (향상된 버전)
         function showStatus(message, type) {
             const statusEl = document.getElementById('status');
-            statusEl.textContent = message;
             statusEl.className = `status ${type}`;
             statusEl.classList.remove('hidden');
             
             if (type === 'processing') {
                 statusEl.innerHTML = '<span class="loading"></span>' + message;
+            } else {
+                statusEl.textContent = message;
+            }
+            
+            // 성공/오류 메시지는 5초 후 자동으로 숨김
+            if (type === 'success' || type === 'error') {
+                setTimeout(() => {
+                    if (statusEl.textContent === message) {
+                        statusEl.classList.add('hidden');
+                    }
+                }, 5000);
             }
         }
 
@@ -815,8 +1212,13 @@
         function loadSavedData() {
             const saved = localStorage.getItem('wreathData');
             if (saved) {
-                savedData = JSON.parse(saved);
-                updateDataList();
+                try {
+                    savedData = JSON.parse(saved);
+                    updateDataList();
+                } catch (error) {
+                    console.error('로컬 데이터 로딩 오류:', error);
+                    savedData = [];
+                }
             }
         }
 
@@ -826,33 +1228,60 @@
             savedItems.innerHTML = '';
             
             if (savedData.length === 0) {
-                savedItems.innerHTML = '<p style="text-align: center; color: #6c757d; padding: 20px;">저장된 화환 데이터가 없습니다.</p>';
+                savedItems.innerHTML = '<p style="text-align: center; color: #6c757d; padding: 25px; background: #f8f9fa; border-radius: 8px;">저장된 화환 데이터가 없습니다.<br><small>촬영 후 저장하면 여기에 표시됩니다.</small></p>';
                 return;
             }
             
-            // 최신 순으로 정렬
-            const sortedData = [...savedData].reverse();
+            // 최신 5개만 표시
+            const recentData = savedData.slice(0, 5);
             
-            sortedData.forEach((item) => {
+            recentData.forEach((item, index) => {
                 const itemEl = document.createElement('div');
                 itemEl.className = 'data-item';
                 itemEl.innerHTML = `
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
-                        <strong>🌸 화환 정보</strong>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                        <strong>🌸 화환 정보 #${index + 1}</strong>
                         <small style="color: #6c757d;">${item.timestamp}</small>
                     </div>
-                    <div style="margin-top: 8px;">
-                        <div style="background: #e3f2fd; padding: 6px; border-radius: 4px; margin-bottom: 4px;">
-                            <strong>좌측:</strong> ${item.leftRibbon || '없음'}
+                    <div style="margin-top: 10px;">
+                        <div style="background: #e3f2fd; padding: 8px; border-radius: 6px; margin-bottom: 6px; border-left: 3px solid #2196f3;">
+                            <strong>좌측:</strong> ${item.leftRibbon || '(없음)'}
                         </div>
-                        <div style="background: #f3e5f5; padding: 6px; border-radius: 4px;">
-                            <strong>우측:</strong> ${item.rightRibbon || '없음'}
+                        <div style="background: #f3e5f5; padding: 8px; border-radius: 6px; border-left: 3px solid #9c27b0;">
+                            <strong>우측:</strong> ${item.rightRibbon || '(없음)'}
                         </div>
                     </div>
                 `;
                 savedItems.appendChild(itemEl);
             });
+            
+            if (savedData.length > 5) {
+                const moreInfo = document.createElement('p');
+                moreInfo.style.cssText = 'text-align: center; color: #6c757d; margin-top: 10px; font-size: 12px;';
+                moreInfo.textContent = `외 ${savedData.length - 5}개의 데이터가 더 있습니다.`;
+                savedItems.appendChild(moreInfo);
+            }
         }
+
+        // 페이지 언로드 시 카메라 정리
+        window.addEventListener('beforeunload', function() {
+            if (currentStream) {
+                currentStream.getTracks().forEach(track => track.stop());
+            }
+        });
+
+        // 페이지 visibility 변경 시 카메라 관리
+        document.addEventListener('visibilitychange', function() {
+            if (currentStream) {
+                if (document.hidden) {
+                    // 페이지가 숨겨지면 카메라 일시정지
+                    currentStream.getVideoTracks().forEach(track => track.enabled = false);
+                } else {
+                    // 페이지가 다시 보이면 카메라 재개
+                    currentStream.getVideoTracks().forEach(track => track.enabled = true);
+                }
+            }
+        });
     </script>
 </body>
 </html>
